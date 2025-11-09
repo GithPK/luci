@@ -1033,7 +1033,8 @@ return view.extend({
 				ss.tab('advanced', _('Advanced Settings'));
 				ss.tab('roaming', _('WLAN roaming'), _('Settings for assisting wireless clients in roaming between multiple APs: 802.11r, 802.11k and 802.11v'));
 
-				o = ss.taboption('general', form.ListValue, 'mode', _('Mode'));
+				o = ss.taboption('general', form.ListValue, 'mode', _('Mode') , !have_mesh ? '<a id="installmesh" href="%s" target="_blank" rel="noreferrer">%s</a>'
+						.format(L.url('admin/system/package-manager') + '?query=wpad-mesh', _('Install mesh wpad') ) : '');
 				o.value('ap', _('Access Point'));
 				o.value('sta', _('Client'));
 				o.value('adhoc', _('Ad-Hoc'));
@@ -1120,31 +1121,7 @@ return view.extend({
 				if (hwtype == 'mac80211') {
 					const mode = ss.children.find(obj => obj.option === 'mode');
 					const bssid = ss.children.find(obj => obj.option === 'bssid');
-			    if (have_mesh) {
-			        mode.value('mesh', '802.11s');
-				    } else {
-				        mode.value('mesh', '802.11s (not available)');
-				        const origRender = mode.renderWidget;
-				        mode.renderWidget = function(section_id, option_id, cfgvalue) {
-				            var node = origRender.apply(this, arguments);
-				            node.addEventListener('change', function(ev) {
-				                if (ev.target.value === 'mesh') {
-				                    L.ui.showModal(_('Required packeges are not available'), [
-				                        E('p', { 'class': 'alert-message warning' },
-				                            _('Mesh mode (802.11s) requires a wpad package with SAE support (e.g. wpad-openssl, wpad-wolfssl, or wpad-mbedtls). Please ensure that a compatible package is installed.')),
-				                        E('div', { 'class': 'right' }, [
-				                            E('button', {
-				                                'class': 'btn',
-				                                'click': function() { L.ui.hideModal(); }
-				                            }, _('Close'))
-				                        ])
-				                    ]);
-				                    ev.target.value = '';
-				                }
-				            });
-				            return node;
-				        };
-				    }
+			    if (have_mesh) mode.value('mesh', '802.11s');
 					mode.value('ahdemo', _('Pseudo Ad-Hoc (ahdemo)'));
 					mode.value('monitor', _('Monitor'));
 
